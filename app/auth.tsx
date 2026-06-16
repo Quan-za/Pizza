@@ -96,7 +96,10 @@ export default function AuthScreen() {
         <Text style={{ color: colors.textMuted }} className="text-xs font-bold mb-1.5 ml-1">
           Select Role
         </Text>
-        <View className="flex-row mb-6 bg-slate-50 dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-100 dark:border-slate-800">
+        <View
+          style={{ backgroundColor: isDark ? '#0f172a' : '#f8fafc', borderColor: isDark ? '#1e293b' : '#f1f5f9' }}
+          className="flex-row mb-6 p-1.5 rounded-2xl border"
+        >
           <TouchableOpacity
             onPress={() => setSelectedRole('user')}
             style={{

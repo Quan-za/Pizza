@@ -57,7 +57,7 @@ export default function CheckoutSuccessScreen() {
         {/* Action CTAs */}
         <View className="w-full">
           <TouchableOpacity
-            onPress={() => router.replace(`/orders/${orderId}`)}
+            onPress={() => router.replace(`/(tabs)/orders/${orderId}`)}
             style={{
               backgroundColor: colors.primary,
               shadowColor: colors.primary,

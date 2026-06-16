@@ -1,4 +1,5 @@
 import { Stack } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import "../global.css";
 import { ThemeProvider } from "../providers/ThemeProvider";
 import { AuthProvider } from "../providers/AuthProvider";
@@ -11,6 +12,7 @@ export default function RootLayout() {
       <AuthProvider>
         <OrderProvider>
           <CartProvider>
+            <StatusBar style="auto" />
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="[id]" options={{ headerShown: false, presentation: 'card' }} />

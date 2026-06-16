@@ -3,7 +3,7 @@ import { View, Text, FlatList, TouchableOpacity, SafeAreaView, Platform } from '
 import { useOrders } from '../../../providers/OrderProvider';
 import { useTheme } from '../../../providers/ThemeProvider';
 import { useAuth } from '../../../providers/AuthProvider';
-import { Link } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { ChevronRight, Clock, PackageCheck } from 'lucide-react-native';
 import { Order, OrderStatus } from '../../../types';
 
@@ -11,6 +11,7 @@ export default function OrdersIndexScreen() {
   const { orders } = useOrders();
   const { colors } = useTheme();
   const { role } = useAuth();
+  const router = useRouter();
 
   // Filter orders based on role and active vs past
   // Admin sees all orders, normal user sees only theirs (in this mock, all orders share user_id '1' or 'usr-782')
@@ -61,49 +62,48 @@ export default function OrdersIndexScreen() {
       .join(', ') || 'No details available';
 
     return (
-      <Link href={`/orders/${item.id}`} asChild>
-        <TouchableOpacity
-          activeOpacity={0.9}
-          style={{ backgroundColor: colors.card, borderColor: colors.border }}
-          className="p-5 rounded-3xl mb-4 border flex-row items-center justify-between"
-        >
-          <View className="flex-1 pr-4">
-            {/* Header row */}
-            <View className="flex-row items-center mb-2 flex-wrap">
-              <Text style={{ color: colors.text }} className="font-extrabold text-sm mr-2">
-                Order #{item.id}
-              </Text>
-              <Text style={{ color: colors.textMuted }} className="text-xs mr-3">
-                {dateStr}
-              </Text>
-              
-              <View
-                style={{ backgroundColor: statusInfo.bg }}
-                className="px-2.5 py-0.5 rounded-full"
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={() => router.push(`/(tabs)/orders/${item.id}`)}
+        style={{ backgroundColor: colors.card, borderColor: colors.border }}
+        className="p-5 rounded-3xl mb-4 border flex-row items-center justify-between"
+      >
+        <View className="flex-1 pr-4">
+          {/* Header row */}
+          <View className="flex-row items-center mb-2 flex-wrap">
+            <Text style={{ color: colors.text }} className="font-extrabold text-sm mr-2">
+              Order #{item.id}
+            </Text>
+            <Text style={{ color: colors.textMuted }} className="text-xs mr-3">
+              {dateStr}
+            </Text>
+            
+            <View
+              style={{ backgroundColor: statusInfo.bg }}
+              className="px-2.5 py-0.5 rounded-full"
+            >
+              <Text
+                style={{ color: statusInfo.color }}
+                className="text-[10px] font-bold"
               >
-                <Text
-                  style={{ color: statusInfo.color }}
-                  className="text-[10px] font-bold"
-                >
-                  {statusInfo.text}
-                </Text>
-              </View>
+                {statusInfo.text}
+              </Text>
             </View>
-
-            {/* Description */}
-            <Text style={{ color: colors.textMuted }} className="text-xs mb-3" numberOfLines={1}>
-              {itemsSummary}
-            </Text>
-
-            {/* Price */}
-            <Text style={{ color: colors.primary }} className="font-black text-sm">
-              Total: ${item.total.toFixed(2)}
-            </Text>
           </View>
-          
-          <ChevronRight size={20} color={colors.textMuted} />
-        </TouchableOpacity>
-      </Link>
+
+          {/* Description */}
+          <Text style={{ color: colors.textMuted }} className="text-xs mb-3" numberOfLines={1}>
+            {itemsSummary}
+          </Text>
+
+          {/* Price */}
+          <Text style={{ color: colors.primary }} className="font-black text-sm">
+            Total: ${item.total.toFixed(2)}
+          </Text>
+        </View>
+        
+        <ChevronRight size={20} color={colors.textMuted} />
+      </TouchableOpacity>
     );
   };
 
@@ -129,6 +129,8 @@ export default function OrdersIndexScreen() {
           renderItem={renderOrderCard}
           keyExtractor={(item) => item.id.toString()}
           showsVerticalScrollIndicator={false}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ flexGrow: 1 }}
           ListHeaderComponent={
             activeOrders.length > 0 ? (
               <View className="flex-row items-center mb-3">
@@ -149,12 +151,11 @@ export default function OrdersIndexScreen() {
                       Past Orders ({pastOrders.length})
                     </Text>
                   </View>
-                  <FlatList
-                    data={pastOrders}
-                    renderItem={renderOrderCard}
-                    keyExtractor={(item) => item.id.toString()}
-                    scrollEnabled={false}
-                  />
+                  {pastOrders.map((order) => (
+                    <View key={order.id}>
+                      {renderOrderCard({ item: order })}
+                    </View>
+                  ))}
                 </>
               )}
             </View>
@@ -166,14 +167,13 @@ export default function OrdersIndexScreen() {
                   No orders found.
                 </Text>
                 {role !== 'admin' && (
-                  <Link href="/(tabs)" asChild>
-                    <TouchableOpacity
-                      style={{ backgroundColor: colors.primary }}
-                      className="px-6 py-3 rounded-full"
-                    >
-                      <Text className="text-white font-bold text-xs">Order Now</Text>
-                    </TouchableOpacity>
-                  </Link>
+              <TouchableOpacity
+                onPress={() => router.push('/(tabs)')}
+                style={{ backgroundColor: colors.primary }}
+                className="px-6 py-3 rounded-full"
+              >
+                <Text className="text-white font-bold text-xs">Order Now</Text>
+              </TouchableOpacity>
                 )}
               </View>
             ) : null

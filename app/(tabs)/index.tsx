@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, Image, TextInput, TouchableOpacity, ScrollView, SafeAreaView, Platform, Dimensions } from 'react-native';
+import { View, Text, FlatList, Image, TextInput, TouchableOpacity, ScrollView, SafeAreaView, Platform, useWindowDimensions } from 'react-native';
 import { useOrders } from '../../providers/OrderProvider';
 import { useCart } from '../../providers/CartProvider';
 import { useTheme } from '../../providers/ThemeProvider';
 import { useAuth } from '../../providers/AuthProvider';
-import { Link } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Search, ShoppingBag, Flame, Sparkles, Plus } from 'lucide-react-native';
 import { Product } from '../../types';
-
-const { width } = Dimensions.get('window');
 
 const CATEGORIES = ['All', 'Pizza', 'Pasta', 'Sides', 'Drinks'];
 
@@ -17,6 +15,8 @@ export default function MenuScreen() {
   const { items } = useCart();
   const { colors, isDark } = useTheme();
   const { user } = useAuth();
+  const router = useRouter();
+  const { width } = useWindowDimensions();
   
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
@@ -27,12 +27,13 @@ export default function MenuScreen() {
   // Filter products based on search query and category
   const filteredProducts = products.filter((product) => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const name = product.name.toLowerCase();
     const matchesCategory =
       selectedCategory === 'All' ||
-      (selectedCategory === 'Pizza' && product.name.toLowerCase().includes('pizza') || product.name.toLowerCase().includes('pepperoni') || product.name.toLowerCase().includes('extravaganzza') || product.name.toLowerCase().includes('meatzza') || product.name.toLowerCase().includes('margarita') || product.name.toLowerCase().includes('veggie') || product.name.toLowerCase().includes('hawaiian') || product.name.toLowerCase().includes('deluxe') || product.name.toLowerCase().includes('cheese')) ||
-      (selectedCategory === 'Pasta' && product.name.toLowerCase().includes('pasta')) ||
-      (selectedCategory === 'Sides' && product.name.toLowerCase().includes('sides') || product.name.toLowerCase().includes('bread')) ||
-      (selectedCategory === 'Drinks' && product.name.toLowerCase().includes('drink') || product.name.toLowerCase().includes('cola') || product.name.toLowerCase().includes('water'));
+      (selectedCategory === 'Pizza' && (name.includes('pizza') || name.includes('pepperoni') || name.includes('extravaganzza') || name.includes('meatzza') || name.includes('margarita') || name.includes('veggie') || name.includes('hawaiian') || name.includes('deluxe') || name.includes('cheese'))) ||
+      (selectedCategory === 'Pasta' && name.includes('pasta')) ||
+      (selectedCategory === 'Sides' && (name.includes('sides') || name.includes('bread'))) ||
+      (selectedCategory === 'Drinks' && (name.includes('drink') || name.includes('cola') || name.includes('water')));
     return matchesSearch && matchesCategory;
   });
 
@@ -42,55 +43,56 @@ export default function MenuScreen() {
   const defaultImage = 'https://notjustdev-dummy.s3.us-east-2.amazonaws.com/food/default.png';
 
   const renderProductItem = ({ item }: { item: Product }) => (
-    <Link href={`/${item.id}`} asChild>
-      <TouchableOpacity
-        activeOpacity={0.9}
-        className="flex-1 m-2 rounded-3xl p-3 border"
-        style={{
-          backgroundColor: colors.card,
-          borderColor: colors.border,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: isDark ? 0.3 : 0.05,
-          shadowRadius: 8,
-          elevation: 3,
-        }}
-      >
-        <View className="relative w-full aspect-square rounded-2xl overflow-hidden mb-3 bg-slate-50 dark:bg-slate-900 justify-center items-center">
-          <Image
-            source={{ uri: item.image || defaultImage }}
-            className="w-11/12 h-11/12"
-            resizeMode="contain"
-          />
-          {item.price > 13 && (
-            <View className="absolute top-2 left-2 flex-row items-center bg-orange-500 rounded-full px-2 py-1">
-              <Flame size={12} color="white" />
-              <Text className="text-[10px] font-bold text-white ml-1">POPULAR</Text>
-            </View>
-          )}
-        </View>
-        
-        <Text
-          style={{ color: colors.text }}
-          className="font-bold text-base mb-1"
-          numberOfLines={1}
-        >
-          {item.name}
-        </Text>
-        
-        <View className="flex-row items-center justify-between mt-auto">
-          <Text style={{ color: colors.primary }} className="font-extrabold text-base">
-            ${item.price.toFixed(2)}
-          </Text>
-          <View
-            style={{ backgroundColor: colors.primaryLight }}
-            className="p-1.5 rounded-full"
-          >
-            <Plus size={16} color={colors.primary} />
+    <TouchableOpacity
+      activeOpacity={0.9}
+      onPress={() => router.push(`/${item.id}`)}
+      style={{
+        flex: 1,
+        margin: 8,
+        borderRadius: 24,
+        padding: 12,
+        borderWidth: 1,
+        backgroundColor: colors.card,
+        borderColor: colors.border,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: isDark ? 0.3 : 0.05,
+        shadowRadius: 8,
+        elevation: 3,
+      }}
+    >
+      <View style={{ position: 'relative', width: '100%', aspectRatio: 1, borderRadius: 16, overflow: 'hidden', marginBottom: 12, backgroundColor: isDark ? '#0f172a' : '#f8fafc', justifyContent: 'center', alignItems: 'center' }}>
+        <Image
+          source={{ uri: item.image || defaultImage }}
+          style={{ width: '91.67%', height: '91.67%' }}
+          resizeMode="contain"
+        />
+        {item.price > 13 && (
+          <View style={{ position: 'absolute', top: 8, left: 8, flexDirection: 'row', alignItems: 'center', backgroundColor: '#f97316', borderRadius: 999, paddingHorizontal: 8, paddingVertical: 4 }}>
+            <Flame size={12} color="white" />
+            <Text style={{ fontSize: 10, fontWeight: 'bold', color: 'white', marginLeft: 4 }}>POPULAR</Text>
           </View>
+        )}
+      </View>
+      
+      <Text
+        style={{ color: colors.text, fontWeight: 'bold', fontSize: 16, marginBottom: 4 }}
+        numberOfLines={1}
+      >
+        {item.name}
+      </Text>
+      
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
+        <Text style={{ color: colors.primary, fontWeight: '800', fontSize: 16 }}>
+          ${item.price.toFixed(2)}
+        </Text>
+        <View
+          style={{ backgroundColor: colors.primaryLight, padding: 6, borderRadius: 999 }}
+        >
+          <Plus size={16} color={colors.primary} />
         </View>
-      </TouchableOpacity>
-    </Link>
+      </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -110,22 +112,21 @@ export default function MenuScreen() {
             </Text>
           </View>
           
-          <Link href="/cart" asChild>
-            <TouchableOpacity
+          <TouchableOpacity
               activeOpacity={0.8}
+              onPress={() => router.push('/cart')}
               style={{ backgroundColor: colors.card, borderColor: colors.border }}
               className="p-3 rounded-full relative border"
             >
               <ShoppingBag size={22} color={colors.text} />
               {totalCartQuantity > 0 && (
-                <View className="absolute -top-1 -right-1 bg-orange-500 rounded-full h-5 min-w-[20px] px-1 items-center justify-center border-2 border-white dark:border-slate-950">
-                  <Text className="text-[10px] font-black text-white">
+                <View style={{ position: 'absolute', top: -4, right: -4, backgroundColor: '#f97316', borderRadius: 999, height: 20, minWidth: 20, paddingHorizontal: 4, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: isDark ? '#020617' : 'white' }}>
+                  <Text style={{ fontSize: 10, fontWeight: '900', color: 'white' }}>
                     {totalCartQuantity}
                   </Text>
                 </View>
               )}
             </TouchableOpacity>
-          </Link>
         </View>
 
         {/* Welcome Text */}
@@ -159,6 +160,8 @@ export default function MenuScreen() {
           renderItem={renderProductItem}
           keyExtractor={(item) => item.id.toString()}
           numColumns={2}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={
             <>
@@ -177,8 +180,9 @@ export default function MenuScreen() {
                     className="-mx-4 px-4"
                   >
                     {featuredProducts.map((prod) => (
-                      <Link key={prod.id} href={`/${prod.id}`} asChild>
                         <TouchableOpacity
+                          key={prod.id}
+                          onPress={() => router.push(`/${prod.id}`)}
                           activeOpacity={0.95}
                           style={{
                             backgroundColor: colors.primary,
@@ -217,7 +221,6 @@ export default function MenuScreen() {
                             />
                           </View>
                         </TouchableOpacity>
-                      </Link>
                     ))}
                   </ScrollView>
                 </View>

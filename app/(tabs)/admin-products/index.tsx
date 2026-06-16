@@ -18,31 +18,34 @@ export default function AdminProductsScreen() {
       activeOpacity={0.9}
       onPress={() => router.push(`/admin-products/${item.id}`)}
       style={{
+        flex: 1,
+        margin: 8,
+        borderRadius: 24,
+        padding: 12,
+        borderWidth: 1,
         backgroundColor: colors.card,
         borderColor: colors.border,
       }}
-      className="flex-1 m-2 rounded-3xl p-3 border"
     >
-      <View className="relative w-full aspect-square rounded-2xl overflow-hidden mb-3 bg-slate-50 dark:bg-slate-900 justify-center items-center">
+      <View style={{ position: 'relative', width: '100%', aspectRatio: 1, borderRadius: 16, overflow: 'hidden', marginBottom: 12, backgroundColor: isDark ? '#0f172a' : '#f8fafc', justifyContent: 'center', alignItems: 'center' }}>
         <Image
           source={{ uri: item.image || defaultImage }}
-          className="w-11/12 h-11/12"
+          style={{ width: '91.67%', height: '91.67%' }}
           resizeMode="contain"
         />
-        <View className="absolute top-2 right-2 bg-slate-900/60 p-1.5 rounded-full">
+        <View style={{ position: 'absolute', top: 8, right: 8, backgroundColor: 'rgba(15, 23, 42, 0.6)', padding: 6, borderRadius: 999 }}>
           <Edit3 size={12} color="white" />
         </View>
       </View>
       
       <Text
-        style={{ color: colors.text }}
-        className="font-bold text-sm mb-1"
+        style={{ color: colors.text, fontWeight: 'bold', fontSize: 14, marginBottom: 4 }}
         numberOfLines={1}
       >
         {item.name}
       </Text>
       
-      <Text style={{ color: colors.primary }} className="font-extrabold text-sm mt-auto">
+      <Text style={{ color: colors.primary, fontWeight: '800', fontSize: 14, marginTop: 'auto' }}>
         ${item.price.toFixed(2)}
       </Text>
     </TouchableOpacity>
@@ -70,6 +73,8 @@ export default function AdminProductsScreen() {
           renderItem={renderAdminProduct}
           keyExtractor={(item) => item.id.toString()}
           numColumns={2}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={
             <View className="flex-row items-center mb-4">
